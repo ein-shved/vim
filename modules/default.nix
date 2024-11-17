@@ -2,6 +2,7 @@
 {
   imports = [
     ./colors
+    ./config
     ./plugins
   ];
 }

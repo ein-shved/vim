@@ -1,0 +1,4 @@
+{ ... }:
+{
+  clipboard.register = [ "unnamedplus" ];
+}
