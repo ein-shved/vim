@@ -1,0 +1,6 @@
+{ ... }:
+{
+  extraConfigLua = ''
+    vim.g.mapleader = ' '
+  '';
+}

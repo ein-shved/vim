@@ -1,4 +1,7 @@
 { ... }:
 {
-  imports = [ ./clipboard.nix ];
+  imports = [
+    ./clipboard.nix
+    ./mappings.nix
+  ];
 }
