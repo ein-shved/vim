@@ -1,6 +1,43 @@
-{ ... }:
+{ helpers, ... }:
 {
   extraConfigLua = ''
     vim.g.mapleader = ' '
+    local function fontcfg(add)
+      local m = string.gmatch(vim.o.guifont, '([^(:h)]+)')
+      local font = m()
+      local h = m()
+      local nh = 8
+      if not font then
+        return
+      end
+      if h then
+        nh = tonumber(h) + add
+      end
+      vim.o.guifont = font .. ":h" .. tostring(nh)
+    end
   '';
+  keymaps = [
+    {
+      key = "<C-s>";
+      action = "<cmd>wa<CR>";
+      mode = [
+        "i"
+        "n"
+      ];
+    }
+    {
+      key = "<C-->";
+      action = helpers.mkRaw "function() fontcfg(-1) end";
+      mode = [
+        "n"
+      ];
+    }
+    {
+      key = "<C-+>";
+      action = helpers.mkRaw "function() fontcfg(1) end";
+      mode = [
+        "n"
+      ];
+    }
+  ];
 }
