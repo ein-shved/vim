@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, helpers, ... }:
 {
   plugins = {
     lsp = {
@@ -16,6 +16,18 @@
           "<leader>gt" = "type_definition";
           "<leader>fm" = "format";
         };
+        extra =
+          let
+            mkCaKey = mode: function: {
+              key = "<leader>ca";
+              action = helpers.mkRaw ''require("fastaction").${function}'';
+              mode = [ mode ];
+            };
+          in
+          [
+            (mkCaKey "n" "code_action")
+            (mkCaKey "v" "range_code_action")
+          ];
       };
     };
     lsp.servers = {
@@ -40,5 +52,6 @@
         installRustc = false;
       };
     };
+    fastaction.enable = true;
   };
 }
