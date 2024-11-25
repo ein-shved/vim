@@ -15,6 +15,7 @@
           "<leader>gi" = "implementation";
           "<leader>gt" = "type_definition";
           "<leader>fm" = "format";
+          "<leader>ra" = "rename";
         };
         extra =
           let
@@ -29,6 +30,50 @@
             (mkCaKey "v" "range_code_action")
           ];
       };
+      # Partial copy-paste from
+      # https://github.com/NvChad/ui/blob/v2.0/lua/nvchad/lsp.lua
+      postConfig = ''
+        local signs = {
+          DiagnosticSignError = "󰅙",
+          DiagnosticSignWarn = "",
+          DiagnosticSignInfo = "󰋼",
+          DiagnosticSignHint = "󰌵",
+        }
+
+        for sign,text in pairs(signs) do
+          vim.fn.sign_define(sign, {
+              text = text,
+              texthl = sign,
+            })
+        end
+        vim.diagnostic.config({
+            virtual_text = false,
+            signs = true,
+            underline = true,
+            float = { border = "rounded" },
+          })
+
+        vim.lsp.handlers["textDocument/hover"] =
+          vim.lsp.with(vim.lsp.handlers.hover, {
+            border = "rounded",
+          })
+        vim.lsp.handlers["textDocument/signatureHelp"] =
+          vim.lsp.with(vim.lsp.handlers.signature_help, {
+            border = "rounded",
+            focusable = false,
+            relative = "cursor",
+          })
+
+        -- Borders for LspInfo winodw
+        local win = require "lspconfig.ui.windows"
+        local _default_opts = win.default_opts
+
+        win.default_opts = function(options)
+          local opts = _default_opts(options)
+          opts.border = "rounded"
+          return opts
+        end
+      '';
     };
     lsp.servers = {
       bashls.enable = true;
@@ -47,9 +92,8 @@
       pylsp.enable = true;
       rust-analyzer = {
         enable = true;
-        # Going to use compilers from devshell
-        installCargo = false;
-        installRustc = false;
+        installCargo = true;
+        installRustc = true;
       };
     };
     fastaction.enable = true;
