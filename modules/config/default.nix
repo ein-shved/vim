@@ -5,4 +5,6 @@
     ./mappings.nix
     ./options.nix
   ];
+  viAlias = true;
+  vimAlias = true;
 }
