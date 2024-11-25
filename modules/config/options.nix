@@ -1,4 +1,4 @@
-{ ... }:
+{ helpers, ... }:
 {
   opts = {
     number = false;
@@ -28,4 +28,27 @@
     spell = true;
     spelllang = "en,ru";
   };
+  autoCmd = [
+    {
+      event = "BufWritePre";
+      pattern = "*";
+      command = '':%s/\s\+$//e'';
+    }
+    {
+      event = "FileType";
+      pattern = [
+        "xml"
+        "nix"
+        "lua"
+        "json"
+        "yaml"
+      ];
+      callback = helpers.mkRaw ''
+        function()
+            vim.opt_local.tabstop = 2;
+            vim.opt_local.shiftwidth = 2;
+        end
+      '';
+    }
+  ];
 }
