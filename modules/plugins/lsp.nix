@@ -77,7 +77,19 @@
     };
     lsp.servers = {
       bashls.enable = true;
-      clangd.enable = true;
+      clangd = {
+        enable = true;
+        cmd =
+          let
+            clangd = "${pkgs.llvmPackages.clang-unwrapped}/bin/clangd";
+          in
+          [
+            clangd
+            "-j=8"
+            "--query-driver=/home/shved/kl/**/*,/nix/store/**/*,*"
+            "--header-insertion=never"
+          ];
+      };
       cmake.enable = true;
       lua-ls.enable = true;
       marksman.enable = true;
@@ -89,7 +101,19 @@
           "80"
         ];
       };
-      pylsp.enable = true;
+      pylsp = {
+        enable = true;
+        settings.configurationSources = "flake8";
+        settings.plugins = {
+          autopep8.enable = true;
+          flake8.enable = true;
+          pylint.enable = true;
+          ruff.enable = true;
+          pylsp_mypy.enable = true;
+        };
+      };
+      pyright.enable = true;
+      pylyzer.enable = true;
       rust-analyzer = {
         enable = true;
         installCargo = true;
