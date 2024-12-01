@@ -23,6 +23,7 @@
               key = "<leader>ca";
               action = helpers.mkRaw ''require("fastaction").${function}'';
               mode = [ mode ];
+              options.desc = "Code action";
             };
           in
           [
@@ -91,7 +92,7 @@
           ];
       };
       cmake.enable = true;
-      lua-ls.enable = true;
+      lua_ls.enable = true;
       marksman.enable = true;
       nixd = {
         enable = true;
@@ -114,7 +115,7 @@
       };
       pyright.enable = true;
       pylyzer.enable = true;
-      rust-analyzer = {
+      rust_analyzer = {
         enable = true;
         installCargo = true;
         installRustc = true;

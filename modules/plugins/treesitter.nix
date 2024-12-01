@@ -2,7 +2,11 @@
 {
   plugins.treesitter = {
     enable = true;
-    ensureInstalled = "all";
     nixvimInjections = true;
+    settings = {
+      auto_install = false;
+      highlight.enable = true;
+      ident.enable = true;
+    };
   };
 }
