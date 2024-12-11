@@ -1,0 +1,350 @@
+From 003b8a251dc1184e36c222f675bf79a50a40ab3a Mon Sep 17 00:00:00 2001
+From: Tristan Knight <admin@snappeh.com>
+Date: Sun, 8 Sep 2024 11:44:46 +0100
+Subject: [PATCH] fix(lsp): handle out-of-bounds character positions #30288
+
+Problem:
+str_byteindex_enc could return an error if the index was longer than the
+lline length. This was handled in each of the calls to it individually
+
+Solution:
+* Fix the call at the source level so that if the index is higher than
+  the line length, line length is returned as per LSP specification
+* Remove pcalls on str_byteindex_enc calls. No longer needed now that
+  str_byteindex_enc has a bounds check.
+---
+ runtime/lua/vim/lsp/inlay_hint.lua      |  7 +--
+ runtime/lua/vim/lsp/semantic_tokens.lua |  7 +--
+ runtime/lua/vim/lsp/util.lua            | 31 ++++------
+ test/functional/plugin/lsp_spec.lua     | 81 +++++++++++++++++--------
+ 4 files changed, 71 insertions(+), 55 deletions(-)
+
+diff --git a/runtime/lua/vim/lsp/inlay_hint.lua b/runtime/lua/vim/lsp/inlay_hint.lua
+index 1e224d1bef..4483b083de 100644
+--- a/runtime/lua/vim/lsp/inlay_hint.lua
++++ b/runtime/lua/vim/lsp/inlay_hint.lua
+@@ -77,12 +77,7 @@ function M.on_inlayhint(err, result, ctx, _)
+     local col = position.character
+     if col > 0 then
+       local line = lines[position.line + 1] or ''
+-      local ok, convert_result
+-      ok, convert_result = pcall(util._str_byteindex_enc, line, col, client.offset_encoding)
+-      if ok then
+-        return convert_result
+-      end
+-      return math.min(#line, col)
++      return util._str_byteindex_enc(line, col, client.offset_encoding)
+     end
+     return col
+   end
+diff --git a/runtime/lua/vim/lsp/semantic_tokens.lua b/runtime/lua/vim/lsp/semantic_tokens.lua
+index 2ae86851d1..8182457dd0 100644
+--- a/runtime/lua/vim/lsp/semantic_tokens.lua
++++ b/runtime/lua/vim/lsp/semantic_tokens.lua
+@@ -140,12 +140,7 @@ local function tokens_to_ranges(data, bufnr, client, request)
+     local function _get_byte_pos(col)
+       if col > 0 then
+         local buf_line = lines[line + 1] or ''
+-        local ok, result
+-        ok, result = pcall(util._str_byteindex_enc, buf_line, col, client.offset_encoding)
+-        if ok then
+-          return result
+-        end
+-        return math.min(#buf_line, col)
++        return util._str_byteindex_enc(buf_line, col, client.offset_encoding)
+       end
+       return col
+     end
+diff --git a/runtime/lua/vim/lsp/util.lua b/runtime/lua/vim/lsp/util.lua
+index ec66449b54..5046459645 100644
+--- a/runtime/lua/vim/lsp/util.lua
++++ b/runtime/lua/vim/lsp/util.lua
+@@ -147,6 +147,12 @@ end
+ ---@param encoding string utf-8|utf-16|utf-32| defaults to utf-16
+ ---@return integer byte (utf-8) index of `encoding` index `index` in `line`
+ function M._str_byteindex_enc(line, index, encoding)
++  local len = vim.fn.strlen(line)
++  if index > len then
++    -- LSP spec: if character > line length, default to the line length.
++    -- https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#position
++    return len
++  end
+   if not encoding then
+     encoding = 'utf-16'
+   end
+@@ -166,7 +172,6 @@ function M._str_byteindex_enc(line, index, encoding)
+ end
+ 
+ local _str_utfindex_enc = M._str_utfindex_enc
+-local _str_byteindex_enc = M._str_byteindex_enc
+ 
+ --- Replaces text in a range with new text.
+ ---
+@@ -334,12 +339,7 @@ local function get_line_byte_from_position(bufnr, position, offset_encoding)
+   -- character
+   if col > 0 then
+     local line = get_line(bufnr, position.line) or ''
+-    local ok, result
+-    ok, result = pcall(_str_byteindex_enc, line, col, offset_encoding)
+-    if ok then
+-      return result
+-    end
+-    return math.min(#line, col)
++    return M._str_byteindex_enc(line, col, offset_encoding or 'utf-16')
+   end
+   return col
+ end
+@@ -436,14 +436,15 @@ function M.apply_text_edits(text_edits, bufnr, offset_encoding)
+         e.end_col = last_line_len
+         has_eol_text_edit = true
+       else
+-        -- If the replacement is over the end of a line (i.e. e.end_col is out of bounds and the
++        -- If the replacement is over the end of a line (i.e. e.end_col is equal to the line length and the
+         -- replacement text ends with a newline We can likely assume that the replacement is assumed
+         -- to be meant to replace the newline with another newline and we need to make sure this
+         -- doesn't add an extra empty line. E.g. when the last line to be replaced contains a '\r'
+         -- in the file some servers (clangd on windows) will include that character in the line
+         -- while nvim_buf_set_text doesn't count it as part of the line.
+         if
+-          e.end_col > last_line_len
++          e.end_col >= last_line_len
++          and text_edit.range['end'].character > e.end_col
+           and #text_edit.newText > 0
+           and string.sub(text_edit.newText, -1) == '\n'
+         then
+@@ -1795,17 +1796,9 @@ function M.locations_to_items(locations, offset_encoding)
+       local row = pos.line
+       local end_row = end_pos.line
+       local line = lines[row] or ''
+-      local line_len = vim.fn.strcharlen(line)
+       local end_line = lines[end_row] or ''
+-      local end_line_len = vim.fn.strcharlen(end_line)
+-      -- LSP spec: if character > line length, default to the line length.
+-      -- https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#position
+-      local col = pos.character <= line_len
+-          and M._str_byteindex_enc(line, pos.character, offset_encoding)
+-        or line_len
+-      local end_col = end_pos.character <= end_line_len
+-          and M._str_byteindex_enc(end_line, end_pos.character, offset_encoding)
+-        or end_line_len
++      local col = M._str_byteindex_enc(line, pos.character, offset_encoding)
++      local end_col = M._str_byteindex_enc(end_line, end_pos.character, offset_encoding)
+ 
+       table.insert(items, {
+         filename = filename,
+diff --git a/test/functional/plugin/lsp_spec.lua b/test/functional/plugin/lsp_spec.lua
+index 1d43b5d449..88b0e0c991 100644
+--- a/test/functional/plugin/lsp_spec.lua
++++ b/test/functional/plugin/lsp_spec.lua
+@@ -3607,21 +3607,21 @@ describe('LSP', function()
+             range = {
+               ['end'] = {
+                 character = 8,
+-                line = 9,
++                line = 3,
+               },
+               start = {
+                 character = 6,
+-                line = 9,
++                line = 3,
+               },
+             },
+             selectionRange = {
+               ['end'] = {
+                 character = 8,
+-                line = 9,
++                line = 3,
+               },
+               start = {
+                 character = 6,
+-                line = 9,
++                line = 3,
+               },
+             },
+             uri = 'file:///home/jiangyinzuo/hello.cpp',
+@@ -3651,21 +3651,21 @@ describe('LSP', function()
+             range = {
+               ['end'] = {
+                 character = 8,
+-                line = 8,
++                line = 2,
+               },
+               start = {
+                 character = 6,
+-                line = 8,
++                line = 2,
+               },
+             },
+             selectionRange = {
+               ['end'] = {
+                 character = 8,
+-                line = 8,
++                line = 2,
+               },
+               start = {
+                 character = 6,
+-                line = 8,
++                line = 2,
+               },
+             },
+             uri = 'file:///home/jiangyinzuo/hello.cpp',
+@@ -3679,7 +3679,15 @@ describe('LSP', function()
+         })
+         local client_id = vim.lsp.start({ name = 'dummy', cmd = server.cmd })
+         local handler = require 'vim.lsp.handlers'['typeHierarchy/subtypes']
+-        handler(nil, clangd_response, { client_id = client_id, bufnr = 1 })
++        local bufnr = vim.api.nvim_get_current_buf()
++        vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {
++          'class B : public A{};',
++          'class C : public B{};',
++          'class D1 : public C{};',
++          'class D2 : public C{};',
++          'class E : public D1, D2 {};',
++        })
++        handler(nil, clangd_response, { client_id = client_id, bufnr = bufnr })
+         return vim.fn.getqflist()
+       end)
+ 
+@@ -3689,7 +3697,7 @@ describe('LSP', function()
+           col = 7,
+           end_col = 0,
+           end_lnum = 0,
+-          lnum = 10,
++          lnum = 4,
+           module = '',
+           nr = 0,
+           pattern = '',
+@@ -3703,7 +3711,7 @@ describe('LSP', function()
+           col = 7,
+           end_col = 0,
+           end_lnum = 0,
+-          lnum = 9,
++          lnum = 3,
+           module = '',
+           nr = 0,
+           pattern = '',
+@@ -3763,7 +3771,15 @@ describe('LSP', function()
+         })
+         local client_id = vim.lsp.start({ name = 'dummy', cmd = server.cmd })
+         local handler = require 'vim.lsp.handlers'['typeHierarchy/subtypes']
+-        handler(nil, jdtls_response, { client_id = client_id, bufnr = 1 })
++        local bufnr = vim.api.nvim_get_current_buf()
++        vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {
++          'package mylist;',
++          '',
++          'public class MyList {',
++          ' static class Inner extends MyList{}',
++          '~}',
++        })
++        handler(nil, jdtls_response, { client_id = client_id, bufnr = bufnr })
+         return vim.fn.getqflist()
+       end)
+ 
+@@ -3840,21 +3856,21 @@ describe('LSP', function()
+             range = {
+               ['end'] = {
+                 character = 8,
+-                line = 9,
++                line = 3,
+               },
+               start = {
+                 character = 6,
+-                line = 9,
++                line = 3,
+               },
+             },
+             selectionRange = {
+               ['end'] = {
+                 character = 8,
+-                line = 9,
++                line = 3,
+               },
+               start = {
+                 character = 6,
+-                line = 9,
++                line = 3,
+               },
+             },
+             uri = 'file:///home/jiangyinzuo/hello.cpp',
+@@ -3884,21 +3900,21 @@ describe('LSP', function()
+             range = {
+               ['end'] = {
+                 character = 8,
+-                line = 8,
++                line = 2,
+               },
+               start = {
+                 character = 6,
+-                line = 8,
++                line = 2,
+               },
+             },
+             selectionRange = {
+               ['end'] = {
+                 character = 8,
+-                line = 8,
++                line = 2,
+               },
+               start = {
+                 character = 6,
+-                line = 8,
++                line = 2,
+               },
+             },
+             uri = 'file:///home/jiangyinzuo/hello.cpp',
+@@ -3912,7 +3928,16 @@ describe('LSP', function()
+         })
+         local client_id = vim.lsp.start({ name = 'dummy', cmd = server.cmd })
+         local handler = require 'vim.lsp.handlers'['typeHierarchy/supertypes']
+-        handler(nil, clangd_response, { client_id = client_id, bufnr = 1 })
++        local bufnr = vim.api.nvim_get_current_buf()
++        vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {
++          'class B : public A{};',
++          'class C : public B{};',
++          'class D1 : public C{};',
++          'class D2 : public C{};',
++          'class E : public D1, D2 {};',
++        })
++
++        handler(nil, clangd_response, { client_id = client_id, bufnr = bufnr })
+         return vim.fn.getqflist()
+       end)
+ 
+@@ -3922,7 +3947,7 @@ describe('LSP', function()
+           col = 7,
+           end_col = 0,
+           end_lnum = 0,
+-          lnum = 10,
++          lnum = 4,
+           module = '',
+           nr = 0,
+           pattern = '',
+@@ -3936,7 +3961,7 @@ describe('LSP', function()
+           col = 7,
+           end_col = 0,
+           end_lnum = 0,
+-          lnum = 9,
++          lnum = 3,
+           module = '',
+           nr = 0,
+           pattern = '',
+@@ -3996,7 +4021,15 @@ describe('LSP', function()
+         })
+         local client_id = vim.lsp.start({ name = 'dummy', cmd = server.cmd })
+         local handler = require 'vim.lsp.handlers'['typeHierarchy/supertypes']
+-        handler(nil, jdtls_response, { client_id = client_id, bufnr = 1 })
++        local bufnr = vim.api.nvim_get_current_buf()
++        vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {
++          'package mylist;',
++          '',
++          'public class MyList {',
++          ' static class Inner extends MyList{}',
++          '~}',
++        })
++        handler(nil, jdtls_response, { client_id = client_id, bufnr = bufnr })
+         return vim.fn.getqflist()
+       end)
+ 
+-- 
+2.47.0
+
