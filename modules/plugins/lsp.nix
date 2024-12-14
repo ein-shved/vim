@@ -82,10 +82,21 @@
         enable = true;
         cmd =
           let
-            clangd = "${pkgs.llvmPackages.clang-unwrapped}/bin/clangd";
+            clangd =
+              let
+                inherit (pkgs) writeShellScript llvmPackages;
+              in
+              writeShellScript "clangd-chooser" ''
+                if [ -n "$NIX_CLANGD_UNWRAPPED" ]; then
+                  pkg="${llvmPackages.clang-unwrapped}"
+                else
+                  pkg="${llvmPackages.clang-tools}"
+                fi
+                exec "$pkg/bin/clangd" "$@"
+              '';
           in
           [
-            clangd
+            "${clangd}"
             "-j=8"
             "--query-driver=/home/shved/kl/**/*,/nix/store/**/*,*"
             "--header-insertion=never"
