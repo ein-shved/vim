@@ -39,5 +39,46 @@
         "n"
       ];
     }
+    {
+      key = "<S-Insert>";
+      action = "<C-r>*";
+      mode = [
+        "i"
+        "c"
+        "n"
+      ];
+    }
+    {
+      key = "<S-Insert>";
+      action = "<C-r>*";
+      mode = [
+        "i"
+        "c"
+        "n"
+      ];
+    }
+    {
+      key = "<C-S-v>";
+      action = "<C-r>+";
+      mode = [
+        "i"
+        "c"
+        "n"
+      ];
+    }
+    {
+      key = "<C-S-c>";
+      action = "y";
+      mode = [
+        "v"
+      ];
+    }
+    {
+      key = "<Esc><Esc>";
+      action = ":silent nohlsearch<CR>";
+      mode = [
+        "n"
+      ];
+    }
   ];
 }
