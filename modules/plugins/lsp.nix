@@ -87,7 +87,11 @@
                 inherit (pkgs) writeShellScript llvmPackages;
               in
               writeShellScript "clangd-chooser" ''
-                if [ -n "$NIX_CLANGD_UNWRAPPED" ]; then
+                rootdir=$PWD
+                while [ ! -f "$rootdir/.nix-use-clangd-unwrapped" ] && [ "$rootdir" != "/" ]; do
+                  rootdir="$(dirname "$rootdir")"
+                done
+                if [ -f "$rootdir/.nix-use-clangd-unwrapped" ]; then
                   pkg="${llvmPackages.clang-unwrapped}"
                 else
                   pkg="${llvmPackages.clang-tools}"
