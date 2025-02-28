@@ -5,6 +5,8 @@
 
     ./auto-session.nix
     ./cmp.nix
+    ./gitblame.nix
+    ./gitgutter.nix
     ./lsp.nix
     ./neo-tree.nix
     ./telescope.nix
