@@ -55,5 +55,10 @@
         end
       '';
     }
+    {
+      event = "VimResized";
+      pattern = "*";
+      command = ":wincmd =";
+    }
   ];
 }
