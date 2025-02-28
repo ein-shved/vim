@@ -27,6 +27,11 @@
 
     spell = true;
     spelllang = "en,ru";
+
+    undodir = helpers.mkRaw ''
+      vim.fn.expand('$HOME/.vim/undodir')
+    '';
+    undofile = true;
   };
   autoCmd = [
     {
