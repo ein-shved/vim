@@ -5,6 +5,7 @@
 
     ./auto-session.nix
     ./cmp.nix
+    ./comment.nix
     ./gitblame.nix
     ./gitgutter.nix
     ./lsp.nix
