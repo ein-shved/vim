@@ -2,6 +2,7 @@
 {
   imports = [
     ./clipboard.nix
+    ./diagnostic.nix
     ./mappings.nix
     ./options.nix
   ];

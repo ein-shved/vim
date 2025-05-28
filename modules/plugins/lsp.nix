@@ -21,7 +21,11 @@
           let
             mkCaKey = mode: function: {
               key = "<leader>ca";
-              action = helpers.mkRaw ''require("fastaction").${function}'';
+              action = helpers.mkRaw ''
+                function ()
+                  require("fastaction").${function}()
+                end
+              '';
               mode = [ mode ];
               options.desc = "Code action";
             };
@@ -34,26 +38,6 @@
       # Partial copy-paste from
       # https://github.com/NvChad/ui/blob/v2.0/lua/nvchad/lsp.lua
       postConfig = ''
-        local signs = {
-          DiagnosticSignError = "󰅙",
-          DiagnosticSignWarn = "",
-          DiagnosticSignInfo = "󰋼",
-          DiagnosticSignHint = "󰌵",
-        }
-
-        for sign,text in pairs(signs) do
-          vim.fn.sign_define(sign, {
-              text = text,
-              texthl = sign,
-            })
-        end
-        vim.diagnostic.config({
-            virtual_text = false,
-            signs = true,
-            underline = true,
-            float = { border = "rounded" },
-          })
-
         vim.lsp.handlers["textDocument/hover"] =
           vim.lsp.with(vim.lsp.handlers.hover, {
             border = "rounded",

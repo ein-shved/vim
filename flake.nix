@@ -6,17 +6,10 @@
   '';
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
-    home-manager = {
-      url = "github:nix-community/home-manager/release-24.11";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
     flake-utils.url = "github:numtide/flake-utils";
-    nixvim.url = "github:nix-community/nixvim/nixos-24.11";
-    nixvim.inputs = {
-      nixpkgs.follows = "nixpkgs";
-      home-manager.follows = "home-manager";
-    };
+    nixvim.url = "github:nix-community/nixvim/nixos-25.05";
+    nixvim.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
