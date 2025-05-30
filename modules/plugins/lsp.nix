@@ -119,6 +119,7 @@
         installCargo = true;
         installRustc = true;
       };
+      gopls.enable = true;
     };
     fastaction.enable = true;
   };
