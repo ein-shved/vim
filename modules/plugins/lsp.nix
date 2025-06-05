@@ -71,11 +71,23 @@
                 inherit (pkgs) writeShellScript llvmPackages;
               in
               writeShellScript "clangd-chooser" ''
+                checkLabel() {
+                  local rootdir="$1"
+
+                  for label in use-clangd-unwrapped use-clangd; do
+                    if [ -e "$rootdir/.nix-$label" ]; then
+                      return 0
+                    fi
+                  done
+                  return 1
+                }
                 rootdir=$PWD
-                while [ ! -f "$rootdir/.nix-use-clangd-unwrapped" ] && [ "$rootdir" != "/" ]; do
+                while ! checkLabel "$rootdir"  && [ "$rootdir" != "/" ]; do
                   rootdir="$(dirname "$rootdir")"
                 done
-                if [ -f "$rootdir/.nix-use-clangd-unwrapped" ]; then
+                if [ -e "$rootdir/.nix-use-clangd" ]; then
+                  pkg="$rootdir/.nix-use-clangd"
+                elif [ -e "$rootdir/.nix-use-clangd-unwrapped" ]; then
                   pkg="${llvmPackages.clang-unwrapped}"
                 else
                   pkg="${llvmPackages.clang-tools}"
