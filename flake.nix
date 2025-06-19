@@ -10,10 +10,16 @@
     flake-utils.url = "github:numtide/flake-utils";
     nixvim.url = "github:nix-community/nixvim/nixos-25.05";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
+    niri-integration.url = "github:ein-shved/niri-integration/vim";
   };
 
   outputs =
-    { nixvim, flake-utils, ... }:
+    {
+      nixvim,
+      flake-utils,
+      niri-integration,
+      ...
+    }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
@@ -21,7 +27,18 @@
       in
       {
         packages = rec {
-          nvim = nixvim'.makeNixvimWithModule { module = import ./modules; };
+          nvim = nixvim'.makeNixvimWithModule {
+            module = {
+              imports = [
+                ./modules
+              ];
+              nixpkgs.overlays = [
+                (_: _: {
+                  niri-integration = niri-integration.packages."${system}".default;
+                })
+              ];
+            };
+          };
           neovim = nvim;
           vim = nvim;
           default = nvim;
@@ -39,6 +56,7 @@
             in
             {
               nixvim = nixvim.legacyPackages."${system}";
+              niri-integration = niri-integration.packages."${system}".default;
             };
         in
         rec {

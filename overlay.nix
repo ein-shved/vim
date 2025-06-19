@@ -1,3 +1,12 @@
 final: prev: {
-  vim-configured = final.nixvim.makeNixvimWithModule { module = import ./modules; };
+  vim-configured = final.nixvim.makeNixvimWithModule {
+    module = {
+      imports = [ ./modules ];
+      nixpkgs.overlays = [
+        (_: _: {
+          inherit (final) niri-integration;
+        })
+      ];
+    };
+  };
 }
