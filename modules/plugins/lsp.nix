@@ -109,8 +109,6 @@
         enable = true;
         settings.formatting.command = [
           "${pkgs.nixfmt-rfc-style}/bin/nixfmt"
-          "-w"
-          "80"
         ];
       };
       pylsp = {
