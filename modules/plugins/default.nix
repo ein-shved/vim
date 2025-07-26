@@ -9,6 +9,7 @@
     ./gitblame.nix
     ./gitgutter.nix
     ./lsp.nix
+    ./lualine.nix
     ./neo-tree.nix
     ./noice.nix
     ./telescope.nix
