@@ -8,7 +8,8 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
     flake-utils.url = "github:numtide/flake-utils";
-    nixvim.url = "github:nix-community/nixvim/nixos-25.05";
+    #nixvim.url = "github:nix-community/nixvim/nixos-25.05";
+    nixvim.url = "github:ein-shved/nixvim";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
   };
 

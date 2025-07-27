@@ -1,4 +1,4 @@
-{ ... }:
+{ helpers, ... }:
 {
   plugins.noice = {
     enable = true;
@@ -45,6 +45,26 @@
   plugins.nui.enable = true;
   plugins.notify = {
     enable = true;
-    settings.top_down = false;
+    luaConfig.pre = ''
+      function notify_make_stage_custom(stage_name)
+        local stage = require("notify.stages." .. stage_name)("bottom_up")
+        local init = stage[1]
+
+        stage[1] = function(state)
+          tbl = init(state)
+          tbl.relative = "win"
+          return tbl
+        end
+
+        local M = {};
+        setmetatable(M, {
+          __index = function(_, key)
+            return stage[key]
+          end,
+        })
+        return M
+      end
+    '';
+    settings.stages = helpers.mkRaw ''notify_make_stage_custom("fade_in_slide_out")'';
   };
 }
