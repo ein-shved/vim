@@ -16,6 +16,16 @@
           meta.hydraPlatforms = [ ];
           doCheck = false;
         };
+        which-key-nvim = prev.vimPlugins.which-key-nvim.overrideAttrs {
+          pname = "which-key.nvim";
+          version = "2025-07-27";
+          src = final.fetchFromGitHub {
+            owner = "ein-shved";
+            repo = "which-key.nvim";
+            rev = "c3447128de0cdf4b74e90fd62b26514ab78ceace";
+            hash = "sha256-RjC3lCFdaXXCTUFrbPKzUDWuYJwvFg+GZgpdcKU4zjw=";
+          };
+        };
       };
     })
   ];
