@@ -13,8 +13,27 @@
         return theme
       end
     '';
-    settings = {
-      options.theme = helpers.mkRaw ''lualine_make_inactive_custom("papercolor_light")'';
-    };
+    settings =
+      let
+        lualine_c = [
+          (
+            helpers.listToUnkeyedAttrs [ "filename" ]
+            // {
+              path = 4;
+            }
+          )
+        ];
+      in
+      {
+        options.theme = helpers.mkRaw ''lualine_make_inactive_custom("papercolor_light")'';
+        sections = {
+          lualine_b = [ "diagnostics" ];
+          inherit lualine_c;
+          lualine_x = helpers.emptyTable;
+        };
+        inactive_sections = {
+          inherit lualine_c;
+        };
+      };
   };
 }
