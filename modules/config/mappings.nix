@@ -1,6 +1,6 @@
 { helpers, ... }:
 {
-  extraConfigLua = ''
+  extraConfigLuaPre = ''
     vim.g.mapleader = ' '
     local function fontcfg(add)
       local m = string.gmatch(vim.o.guifont, '([^(:h)]+)')
