@@ -1,5 +1,5 @@
-{ ... }:
 {
   imports = [
+    ./langmapper.nix
   ];
 }

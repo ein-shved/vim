@@ -8,6 +8,7 @@
     ./comment.nix
     ./gitblame.nix
     ./gitgutter.nix
+    ./langmapper.nix
     ./lsp.nix
     ./lualine.nix
     ./neo-tree.nix
