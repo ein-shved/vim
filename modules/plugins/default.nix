@@ -19,5 +19,6 @@
   ];
   plugins = {
     web-devicons.enable = true;
+    markview.enable = true;
   };
 }
