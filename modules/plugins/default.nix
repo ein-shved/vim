@@ -3,6 +3,7 @@
   imports = [
     ./extras
 
+    ./aerial.nix
     ./auto-session.nix
     ./cmp.nix
     ./comment.nix
