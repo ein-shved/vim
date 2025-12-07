@@ -2,13 +2,12 @@
   description = ''
     Vim configuration based on
     [nixvim](https://github.com/nix-community/nixvim?tab=readme-ov-file)
-    and [NvChad](https://github.com/NvChad/NvChad)
   '';
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
     flake-utils.url = "github:numtide/flake-utils";
-    nixvim.url = "github:nix-community/nixvim/nixos-25.05";
+    nixvim.url = "github:nix-community/nixvim/nixos-25.11";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
   };
 
