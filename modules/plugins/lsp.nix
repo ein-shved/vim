@@ -14,7 +14,7 @@
           "<leader>gd" = "definition";
           "<leader>gi" = "implementation";
           "<leader>gt" = "type_definition";
-          "<leader>fm" = "format";
+          "<leader>fa" = "format";
           "<leader>ra" = "rename";
         };
         extra =
@@ -59,7 +59,17 @@
           return opts
         end
       '';
+      onAttach = ''
+        vim.keymap.set("n", "<leader>fm",
+            function()
+              local lsp_format_modifications = require"lsp-format-modifications"
+              lsp_format_modifications.format_modifications(client, bufnr)
+            end,
+            {}
+          )
+      '';
     };
+    lsp-format-modifications.enable = true;
     lsp.servers = {
       bashls.enable = true;
       clangd = {
