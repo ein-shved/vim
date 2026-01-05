@@ -1,4 +1,4 @@
-{ pkgs, helpers, ... }:
+{ pkgs, lib, ... }:
 {
   plugins = {
     lsp = {
@@ -21,7 +21,7 @@
           let
             mkCaKey = mode: function: {
               key = "<leader>ca";
-              action = helpers.mkRaw ''
+              action = lib.nixvim.mkRaw ''
                 function ()
                   require("fastaction").${function}()
                 end

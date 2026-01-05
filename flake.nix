@@ -34,7 +34,7 @@
           nixvim-overlay =
             final: prev:
             let
-              system = final.system;
+              system = final.stdenv.hostPlatform.system;
             in
             {
               nixvim = nixvim.legacyPackages."${system}";

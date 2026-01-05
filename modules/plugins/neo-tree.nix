@@ -2,16 +2,18 @@
 {
   plugins.neo-tree = {
     enable = true;
-    filesystem = {
-      hijackNetrwBehavior = "open_current";
-    };
-    buffers = {
-      followCurrentFile = {
-        enabled = false;
+    settings = {
+      filesystem = {
+        hijack_netrw_behavior = "open_current";
       };
-    };
-    window = {
-      position = "current";
+      buffers = {
+        follow_current_file = {
+          enabled = false;
+        };
+      };
+      window = {
+        position = "current";
+      };
     };
   };
   userCommands = {

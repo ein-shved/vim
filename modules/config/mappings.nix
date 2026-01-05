@@ -1,4 +1,4 @@
-{ helpers, ... }:
+{ lib, ... }:
 {
   extraConfigLuaPre = ''
     vim.g.mapleader = ' '
@@ -27,14 +27,14 @@
     }
     {
       key = "<C-->";
-      action = helpers.mkRaw "function() fontcfg(-1) end";
+      action = lib.nixvim.mkRaw "function() fontcfg(-1) end";
       mode = [
         "n"
       ];
     }
     {
       key = "<C-+>";
-      action = helpers.mkRaw "function() fontcfg(1) end";
+      action = lib.nixvim.mkRaw "function() fontcfg(1) end";
       mode = [
         "n"
       ];

@@ -1,4 +1,3 @@
-{ helpers, ... }:
 {
   plugins = {
     cmp-nvim-lsp = {

@@ -1,4 +1,4 @@
-{ helpers, ... }:
+{ lib, ... }:
 {
   opts = {
     number = false;
@@ -28,7 +28,7 @@
     spell = true;
     spelllang = "en,ru";
 
-    undodir = helpers.mkRaw ''
+    undodir = lib.nixvim.mkRaw ''
       vim.fn.expand('$HOME/.vim/undodir')
     '';
     undofile = true;
@@ -48,7 +48,7 @@
         "json"
         "yaml"
       ];
-      callback = helpers.mkRaw ''
+      callback = lib.nixvim.mkRaw ''
         function()
             vim.opt_local.tabstop = 2;
             vim.opt_local.shiftwidth = 2;

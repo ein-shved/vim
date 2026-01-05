@@ -1,4 +1,4 @@
-{ helpers, ... }:
+{ lib, ... }:
 {
   plugins.lualine = {
     enable = true;
@@ -17,7 +17,7 @@
       let
         lualine_c = [
           (
-            helpers.listToUnkeyedAttrs [ "filename" ]
+            lib.nixvim.listToUnkeyedAttrs [ "filename" ]
             // {
               path = 4;
             }
@@ -25,11 +25,11 @@
         ];
       in
       {
-        options.theme = helpers.mkRaw ''lualine_make_inactive_custom("papercolor_light")'';
+        options.theme = lib.nixvim.mkRaw ''lualine_make_inactive_custom("papercolor_light")'';
         sections = {
           lualine_b = [ "diagnostics" ];
           inherit lualine_c;
-          lualine_x = helpers.emptyTable;
+          lualine_x = lib.nixvim.emptyTable;
         };
         inactive_sections = {
           inherit lualine_c;

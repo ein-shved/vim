@@ -1,8 +1,8 @@
-{ helpers, ... }:
+{ lib, ... }:
 {
   plugins.which-key = {
     enable = true;
-    settings.win = helpers.mkRaw ''
+    settings.win = lib.nixvim.mkRaw ''
       {
         relative = "win",
         width = function()
