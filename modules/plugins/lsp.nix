@@ -60,12 +60,16 @@
         end
       '';
       onAttach = ''
+        vim.g.lsp_format_modifications_silence = true
         vim.keymap.set("n", "<leader>fm",
             function()
               local lsp_format_modifications = require"lsp-format-modifications"
-              lsp_format_modifications.format_modifications(client, bufnr)
+              local mod_formatted = lsp_format_modifications.format_modifications(client, bufnr);
+              if not mod_formatted.success then
+                vim.lsp.buf.format()
+              end
             end,
-            {}
+            {silent = true, desc = "Lsp formatting according do modification"}
           )
       '';
     };
