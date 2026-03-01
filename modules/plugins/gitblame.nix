@@ -1,6 +1,7 @@
+{ config, ... }:
 {
   plugins.gitblame = {
-    enable = true;
+    enable = config.setup.development;
     settings = {
       message_template = "<author> • <sha>";
       message_when_not_committed = "";

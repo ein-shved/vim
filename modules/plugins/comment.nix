@@ -1,8 +1,11 @@
+{ config, lib, ... }:
 {
   plugins.comment = {
     enable = true;
     settings = {
-      pre_hook = "require('ts_context_commentstring.integrations.comment_nvim').create_pre_hook()";
+      pre_hook = lib.optionalString config.plugins.ts-context-commentstring.enable ''
+        require('ts_context_commentstring.integrations.comment_nvim').create_pre_hook()
+      '';
 
       opleader = {
         block = "gb";
@@ -14,5 +17,5 @@
       };
     };
   };
-  plugins.ts-context-commentstring.enable = true;
+  plugins.ts-context-commentstring.enable = config.plugins.treesitter.enable;
 }

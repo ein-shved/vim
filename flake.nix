@@ -21,8 +21,17 @@
       {
         packages = rec {
           nvim = nixvim'.makeNixvimWithModule { module = import ./modules; };
+          nvim-nodev = nixvim'.makeNixvimWithModule {
+            module = {
+              imports = [
+                ./modules
+              ];
+              setup.development = false;
+            };
+          };
           neovim = nvim;
           vim = nvim;
+          vi = nvim-nodev;
           default = nvim;
           inherit (nixvim.packages."${system}") docs;
         };

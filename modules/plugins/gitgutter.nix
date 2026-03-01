@@ -1,5 +1,6 @@
+{ config, ... }:
 {
   plugins.gitgutter = {
-    enable = true;
+    enable = config.setup.development;
   };
 }

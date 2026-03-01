@@ -1,8 +1,8 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, config, ... }:
 {
   plugins = {
     lsp = {
-      enable = true;
+      enable = config.setup.development;
       keymaps = {
         diagnostic = {
           "<leader>j" = "goto_next";
@@ -73,8 +73,8 @@
           )
       '';
     };
-    lsp-format-modifications.enable = true;
-    lsp.servers = {
+    lsp-format-modifications.enable = config.plugins.lsp.enable;
+    lsp.servers = lib.mkIf config.plugins.lsp.enable {
       bashls.enable = true;
       clangd = {
         enable = true;

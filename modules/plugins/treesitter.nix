@@ -1,7 +1,8 @@
-{ ... }:
+{ lib, config, ... }:
 {
   plugins.treesitter = {
-    enable = true;
+    enable = config.setup.development;
+    grammarPackages = lib.mkIf (!config.setup.development) [];
     nixvimInjections = true;
     settings = {
       auto_install = false;
