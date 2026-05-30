@@ -1,6 +1,6 @@
 { pkgs, ... }:
 let
-  overriden = pkgs.neovim-unwrapped.overrideAttrs (
+  patched = pkgs.neovim-unwrapped.overrideAttrs (
     final: prev: {
       pathces = (final.patches or [ ]) ++ [
         ./0001-fix-lsp-handle-out-of-bounds-character-positions-302.patch
@@ -9,5 +9,5 @@ let
   );
 in
 {
-  package = overriden;
+  package = patched;
 }

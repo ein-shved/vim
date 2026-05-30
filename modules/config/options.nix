@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ lib, config, ... }:
 {
   opts = {
     number = false;
@@ -61,4 +61,8 @@
       command = ":wincmd =";
     }
   ];
+  waylandSupport = config.setup.development;
+  enableMan = config.setup.development;
+  enablePrintInit = config.setup.development;
+  dependencies.tree-sitter.enable = config.setup.development;
 }
