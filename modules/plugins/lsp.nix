@@ -122,7 +122,7 @@
       nixd = {
         enable = true;
         settings.formatting.command = [
-          "${pkgs.nixfmt-rfc-style}/bin/nixfmt"
+          "${pkgs.nixfmt}/bin/nixfmt"
         ];
       };
       pylsp = {
